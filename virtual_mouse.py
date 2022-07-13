@@ -1,5 +1,6 @@
 # pip3 install opencv-python mediapipe pyautogui
 import cv2
+import time
 import pyautogui
 from mediapipe import solutions
 
@@ -16,6 +17,17 @@ hand_detector = solutions.hands.Hands()
 draw = solutions.drawing_utils
 cap = cv2.VideoCapture(0)
 
+# wrapper function to measuring time
+def timing(f):
+    def wrap(*args, **kwargs):
+        time1 = time.time()
+        ret = f(*args, **kwargs)
+        time2 = time.time()
+        print('{:s} function took {:.3f} ms'.format(f.__name__, (time2-time1)*1000.0))
+
+        return ret
+    return wrap
+
 # draws the hand landmarks in the frame
 def drawHand(frame, hands):
     if hands:
@@ -28,7 +40,8 @@ def process(x, y):
     X.append(x)
     Y.append(y)
     # subhramit's function comes here
-    
+
+@timing
 def recognizeGesture(hands):
     if hands:
         # the wrist of the 1st hand is tracked by landmark[0]
