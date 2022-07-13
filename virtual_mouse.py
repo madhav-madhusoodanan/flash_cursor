@@ -44,7 +44,7 @@ def estimate_coef(x, y):
     c = m_y - m*m_x
   
     return (c, m)
-# line is Y = mX + C 
+# line is Y = mX + c 
 
 def recognizeGesture(hands):
     if hands:
