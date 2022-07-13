@@ -9,8 +9,8 @@ import numpy as np
 pyautogui.MINIMUM_DURATION = 0.01
 pyautogui.PAUSE = 0.0
 INTERPOLATIONS = 10
-X = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
-Y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
+X = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
+Y = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
 
 width, height = pyautogui.size()
 
@@ -37,9 +37,9 @@ def drawHand(frame, hands):
 
 # temporary "noise remover"
 def process(x, y):
-    X, Y = X[1:], Y[1:]
-    X.append(x)
-    Y.append(y)
+    X = np.append(X[1:], x)
+    Y = np.append(Y[1:], y)
+    (c, m) = estimate_coef(X, Y)
     # subhramit's function comes here
 
  
