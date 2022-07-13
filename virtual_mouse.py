@@ -3,6 +3,7 @@ import cv2
 import time
 import pyautogui
 from mediapipe import solutions
+import numpy as np
 
 # both are 0.1 second by default
 pyautogui.MINIMUM_DURATION = 0.01
@@ -40,6 +41,23 @@ def process(x, y):
     X.append(x)
     Y.append(y)
     # subhramit's function comes here
+
+ 
+def estimate_coef(x, y):
+    n = np.size(x)
+    m_x = np.mean(x)
+    m_y = np.mean(y)
+  
+    #cross-deviation
+    SS_xy = np.sum(y*x) - n*m_y*m_x
+    SS_xx = np.sum(x*x) - n*m_x*m_x
+      
+    #regression coefficients
+    m = SS_xy / SS_xx
+    c = m_y - m*m_x
+  
+    return (c, m)
+# line is Y = mX + c 
 
 @timing
 def recognizeGesture(hands):
