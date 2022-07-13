@@ -6,11 +6,16 @@ from mediapipe import solutions
 import numpy as np
 
 # both are 0.1 second by default
-pyautogui.MINIMUM_DURATION = 0.01
+pyautogui.MINIMUM_DURATION = 0.0
 pyautogui.PAUSE = 0.0
 INTERPOLATIONS = 10
-X = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
-Y = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
+ITERATIONS = 4
+ITER_COUNT = 0
+
+# unlike X and Y, T remains constant
+X = np.ones(INTERPOLATIONS) * 100
+Y = np.ones(INTERPOLATIONS) * 100
+T = np.array(range(1, INTERPOLATIONS + 1), float)
 
 width, height = pyautogui.size()
 
@@ -29,20 +34,6 @@ def timing(f):
         return ret
     return wrap
 
-# draws the hand landmarks in the frame
-def drawHand(frame, hands):
-    if hands:
-        for hand in hands:
-            draw.draw_landmarks(frame, hand)
-
-# temporary "noise remover"
-def process(x, y):
-    X = np.append(X[1:], x)
-    Y = np.append(Y[1:], y)
-    (c, m) = estimate_coef(X, Y)
-    # subhramit's function comes here
-
- 
 def estimate_coef(x, y):
     n = np.size(x)
     m_x = np.mean(x)
@@ -56,18 +47,47 @@ def estimate_coef(x, y):
     m = SS_xy / SS_xx
     c = m_y - m*m_x
   
+    # line is Y = mX + c 
     return (c, m)
-# line is Y = mX + c 
+
+
+# draws the hand landmarks in the frame
+def drawHand(frame, hands):
+    if hands:
+        for hand in hands:
+            draw.draw_landmarks(frame, hand)
+
+
+def moveCursor():    
+    global X, Y, T
+    (c_x, m_x) = estimate_coef(T, X)
+    (c_y, m_y) = estimate_coef(T, Y)
+    if abs(m_x) <= 1.5 and abs(m_y) <= 1.5:
+        return
+    
+    x = int(m_x*T[-1] + c_x)
+    y = int(m_y*T[-1] + c_y)
+    pyautogui.moveTo(x, y, tween=pyautogui.easeInOutQuad)
+        
+# temporary "noise remover"
+def process(x, y):
+    global X, Y, T, ITER_COUNT
+    X = np.append(X[1:], x)
+    Y = np.append(Y[1:], y)
+    moveCursor()
+    ITER_COUNT += 1
+    ITER_COUNT = ITER_COUNT % ITER_COUNT
+    # if ITER_COUNT == 0:
+    # subhramit's function comes here
 
 @timing
 def recognizeGesture(hands):
     if hands:
         # the wrist of the 1st hand is tracked by landmark[0]
         landmark = hands[0].landmark[0]
-        x = int(width * 1.25 * landmark.x) - 100
-        y = int(height * 1.25 * landmark.y) - 100
-        pyautogui.moveTo(x, y, 0.01, pyautogui.easeInOutQuad)
-        
+        x = int(width * landmark.x) + 10
+        y = int(height * landmark.y) + 10
+        process(x, y)        
 
 while True:
     _, frame = cap.read()
