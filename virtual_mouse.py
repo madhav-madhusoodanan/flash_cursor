@@ -1,7 +1,5 @@
 # pip3 install opencv-python mediapipe pyautogui
 import cv2
-import time
-import cProfile
 import pyautogui
 from mediapipe import solutions
 
