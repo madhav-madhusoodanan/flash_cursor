@@ -9,18 +9,14 @@ from mediapipe import solutions
 pyautogui.MINIMUM_DURATION = 0.01
 pyautogui.PAUSE = 0.0
 INTERPOLATIONS = 10
+X = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
+Y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
 
 width, height = pyautogui.size()
 
 hand_detector = solutions.hands.Hands()
 draw = solutions.drawing_utils
 cap = cv2.VideoCapture(0)
-
-# function in progress
-def returnInterpolations(a, b):
-    arr = []
-    for i in range(1, INTERPOLATIONS):
-        arr.append()
 
 # draws the hand landmarks in the frame
 def drawHand(frame, hands):
@@ -29,17 +25,18 @@ def drawHand(frame, hands):
             draw.draw_landmarks(frame, hand)
 
 # temporary "noise remover"
-def process(x):
-	return (x - (x%10))
-	# return x
-	
+def process(x, y):
+    X, Y = X[1:], Y[1:]
+    X.append(x)
+    Y.append(y)
+    # subhramit's function comes here
+    
 def recognizeGesture(hands):
     if hands:
+        # the wrist of the 1st hand is tracked by landmark[0]
         landmark = hands[0].landmark[0]
         x = int(width * 1.25 * landmark.x) - 100
         y = int(height * 1.25 * landmark.y) - 100
-        x = process(x)
-        y = process(y)
         pyautogui.moveTo(x, y, 0.01, pyautogui.easeInOutQuad)
         
 
